@@ -63,7 +63,12 @@ walk-forward proof. Details: `docs/BACKTEST.md`.
 ## Layout
 - `src/lib/providers/` — fdcouk (CSV), fd-org, odds-api: fetch + pure mapping
 - `src/lib/ingest/` — `repo.ts` (DB access, TeamResolver), `jobs.ts` (cron jobs)
-- `src/lib/model/` — (STEP 3) pure probability engine
+- `src/lib/model/` — pure probability engine (Dixon-Coles, Elo, Shin, Kelly)
+- `src/lib/backtest/` — walk-forward + metrics
+- `src/lib/picks.ts` · `guardrails.ts` · `stats.ts` — pure app logic (tested)
+- `src/lib/data/queries.ts` — server reads (RLS client) · `src/app/(app)/actions.ts` — server actions
+- `src/proxy.ts` — auth gate (all routes except /login, /auth/*, /api/cron)
+- UI: SVG charts hand-rolled in `src/components/charts.tsx` (no chart lib). In SVG attributes use hex colours, not `var()`.
 - `scripts/` — backfill (and backtest in STEP 4)
 - `supabase/migrations/` — schema + pg_cron
 
@@ -77,6 +82,7 @@ walk-forward proof. Details: `docs/BACKTEST.md`.
 - [x] STEP 2 — data ingestion (code + tests done; DB not yet provisioned — needs Supabase keys)
 - [x] STEP 3 — probability engine (`src/lib/model/`, 94% coverage)
 - [x] STEP 4 — backtest (`npm run backtest`, verdict in `docs/BACKTEST.md`; /backtest page in STEP 5)
-- [ ] STEP 5 — dashboard UI
-- [ ] STEP 6 — Claude analysis layer
-- [ ] STEP 7 — guardrails
+- [x] STEP 5 — dashboard UI (/today, /match/[id], /bets, /stats, /settings, /backtest)
+- [x] STEP 6 — Claude analysis layer (`src/lib/ai/analysis.ts`, `/api/analyse/[matchId]`, number-integrity check)
+- [x] STEP 7 — guardrails (`src/lib/guardrails.ts`, enforced in `placeBet` server action)
+- [ ] Provision Supabase + keys, apply migrations, run backfill, deploy to Vercel (needs owner accounts)

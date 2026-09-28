@@ -37,10 +37,9 @@ Then, in the SQL editor:
 select vault.create_secret('https://<your-app>.vercel.app', 'site_url');
 select vault.create_secret('<CRON_SECRET value>', 'cron_secret');
 ```
-In Authentication → Providers → Email: keep magic link on, **disable sign-ups** after your first login, then register yourself as owner:
-```sql
-insert into app_owner (user_id) select id from auth.users where email = '<OWNER_EMAIL>';
-```
+In Authentication → URL Configuration, set the Site URL and add `<NEXT_PUBLIC_SITE_URL>/auth/callback` to the redirect URLs.
+First magic-link login with `OWNER_EMAIL` registers you as the owner automatically (`app_owner`); then **disable sign-ups**
+(Authentication → Providers → Email). Any other email is rejected anyway.
 
 ### 3. Backfill history (idempotent, safe to re-run)
 ```bash
@@ -50,7 +49,14 @@ npm run backfill -- --league L1 --from 2024
 ```
 CSVs are cached in `data/cache/` (past seasons are never re-downloaded; the current one is).
 
-### 4. Develop
+### 4. Backtest
+```bash
+npm run backtest   # walk-forward on the cached CSVs → src/data/backtest.json (shown on /backtest)
+```
+Verdict and method: [`docs/BACKTEST.md`](docs/BACKTEST.md). Short version: the Dixon-Coles + Elo model does **not** beat the
+sharp market; only the sharp-anchored probability showed positive CLV, so the app uses it by default (`model_weight = 0`).
+
+### 5. Develop
 ```bash
 npm run dev
 npm run verify   # typecheck + lint + tests + build
@@ -59,6 +65,19 @@ Trigger a cron job locally:
 ```bash
 curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/sync-fixtures
 ```
+
+## Pages
+| Route | What |
+|---|---|
+| `/today` | Next 7 days: model %, sharp market %, best French odds, value, suggested stake; filters (min value, league, market) |
+| `/match/[id]` | Score heatmap, odds history, **Analyse** (Claude commentary, cached per match) |
+| `/bets` | Journal: log a bet in 2 clicks from a pick, settle it, P&L and CLV per bet |
+| `/stats` | CLV first, then yield/ROI, profit curve, by league / market / odds range |
+| `/backtest` | Walk-forward results and verdict |
+| `/settings` | Bankroll, Kelly fraction, max stake, monthly budget, value threshold, model weight |
+
+Guardrails: monthly budget (stakes drop to 0 + banner), max 2 % per bet (server-enforced, 5 % hard ceiling), pause banner
+after 5 straight losses, stakes computed on min(bankroll, bankroll + P&L) so they never grow to chase, ANJ link in the footer.
 
 ## Data notes
 - **Sharp reference for CLV / fair odds**: Pinnacle closing odds up to ~Jan 2026 (Pinnacle vanished from
