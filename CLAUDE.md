@@ -41,7 +41,8 @@ JetBrains Mono (numbers/odds). Dark, minimal, data-dense, mobile-first.
 - `npm run test` (Vitest, `tests/**/*.test.ts`) · `npm run typecheck` · `npm run lint`
 - `npm run verify` — all of the above + build; run before every commit
 - `npm run backfill [-- --dry-run | --league L1 | --from 2024 | --refresh]`
-- Cron jobs: `POST /api/cron/{sync-fixtures|odds-daily|odds-closing}` with `Authorization: Bearer $CRON_SECRET`
+- `npm run backtest` — walk-forward on data/cache CSVs → `src/data/backtest.json` (~10 s)
+- Cron jobs: `POST /api/cron/{sync-fixtures|refit|odds-daily|odds-closing}` with `Authorization: Bearer $CRON_SECRET`
 
 ## Data facts learned (don't re-discover)
 - football-data.co.uk URLs redirect to `https://football-data.co.uk/...` (no www) and need a User-Agent.
@@ -52,6 +53,12 @@ JetBrains Mono (numbers/odds). Dark, minimal, data-dense, mobile-first.
   (`src/lib/teams/resolve.ts` static map + fuzzy); misses land in `unresolved_team_names` — never guessed.
 - The Odds API: we pass an explicit `bookmakers=` list (≤10 books = 1 region) → h2h+totals = 2 credits/league call.
 - Odds stored in `odds_snapshots` with bookmaker keys `pinnacle`, `betfair_ex`, `market_max`, `market_avg`, `*_fr`.
+
+## Backtest verdict (drives defaults)
+The DC+Elo model is calibrated but loses to the sharp market on log-loss (0.992 vs 0.976) and its value bets lose
+(−11% yield, −7% CLV). Only the sharp-anchored probability (Pinnacle/Betfair Shin) gave positive CLV. Hence
+`bankroll_settings.model_weight` defaults to 0: value prob = w·model + (1−w)·sharp. Don't raise the default without a new
+walk-forward proof. Details: `docs/BACKTEST.md`.
 
 ## Layout
 - `src/lib/providers/` — fdcouk (CSV), fd-org, odds-api: fetch + pure mapping
@@ -68,8 +75,8 @@ JetBrains Mono (numbers/odds). Dark, minimal, data-dense, mobile-first.
 - [x] STEP 0 — research (see `docs/PLAN.md` §0)
 - [x] STEP 1 — plan (validated)
 - [x] STEP 2 — data ingestion (code + tests done; DB not yet provisioned — needs Supabase keys)
-- [ ] STEP 3 — probability engine
-- [ ] STEP 4 — backtest
+- [x] STEP 3 — probability engine (`src/lib/model/`, 94% coverage)
+- [x] STEP 4 — backtest (`npm run backtest`, verdict in `docs/BACKTEST.md`; /backtest page in STEP 5)
 - [ ] STEP 5 — dashboard UI
 - [ ] STEP 6 — Claude analysis layer
 - [ ] STEP 7 — guardrails

@@ -151,6 +151,9 @@ create table bankroll_settings (
   monthly_budget       numeric(10, 2) not null default 100,
   value_threshold      numeric(4, 3) not null default 0.05,
   blend_weight_dc      numeric(4, 3) not null default 0.7 check (blend_weight_dc between 0 and 1),
+  -- Probability used for value = w·model + (1−w)·sharp market (Shin). Default 0: in the
+  -- walk-forward backtest only the sharp-anchored probability produced positive CLV (see docs/BACKTEST.md).
+  model_weight         numeric(4, 3) not null default 0 check (model_weight between 0 and 1),
   loss_streak_warning  smallint not null default 5,
   updated_at           timestamptz not null default now()
 );

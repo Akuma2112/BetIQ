@@ -2,12 +2,14 @@ import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
 import { snapshotOdds, syncFixtures, type JobReport } from "@/lib/ingest/jobs";
+import { refit } from "@/lib/ingest/refit";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const maxDuration = 60;
 
 const JOBS: Record<string, () => Promise<JobReport>> = {
   "sync-fixtures": () => syncFixtures(createAdminClient(), env("FOOTBALL_DATA_ORG_TOKEN")),
+  refit: () => refit(createAdminClient()),
   "odds-daily": () => snapshotOdds(createAdminClient(), env("ODDS_API_KEY"), env("ODDS_API_MONTHLY_CREDITS"), "daily"),
   "odds-closing": () => snapshotOdds(createAdminClient(), env("ODDS_API_KEY"), env("ODDS_API_MONTHLY_CREDITS"), "closing"),
 };

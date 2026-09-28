@@ -28,7 +28,7 @@ select cron.schedule('betiq-sync-fixtures-am', '0 5 * * *',     $$select public.
 select cron.schedule('betiq-sync-fixtures-pm', '30 23 * * *',   $$select public.trigger_cron_job('sync-fixtures')$$);
 select cron.schedule('betiq-odds-daily',       '0 8 * * *',     $$select public.trigger_cron_job('odds-daily')$$);
 select cron.schedule('betiq-odds-closing',     '*/10 * * * *',  $$select public.trigger_cron_job('odds-closing')$$);
--- 'refit' (model + predictions) is added in STEP 3.
+select cron.schedule('betiq-refit',            '15 5 * * *',    $$select public.trigger_cron_job('refit')$$);
 
 -- Keep pg_net's response log small.
 select cron.schedule('betiq-purge-net-log', '0 3 * * *', $$delete from net._http_response where created < now() - interval '3 days'$$);
