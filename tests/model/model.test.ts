@@ -155,8 +155,8 @@ describe("Elo", () => {
   });
 
   it("regresses toward the mean between seasons", () => {
-    let s = { ratings: { A: 1700, B: 1300 }, season: "2024-25" };
     let s: EloState = { ratings: { A: 1700, B: 1300 }, season: "2024-25" };
+    s = eloUpdate(s, { home: "A", away: "B", homeGoals: 1, awayGoals: 1, season: "2025-26" });
     expect(s.ratings.A).toBeLessThan(1700 - 40); // 1700 → 1660 after carry, then a draw
   });
 
