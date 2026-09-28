@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { blend, clv, clvFair, kellyFraction, suggestedStake, value } from "@/lib/model/betting";
 import { dcObjective, dcPredict, fitDixonColes, type DcMatch } from "@/lib/model/dixon-coles";
-import { DEFAULT_DRAW_MODEL, eloDiff, eloProbs, eloUpdate, emptyElo, fitDrawModel } from "@/lib/model/elo";
+import { DEFAULT_DRAW_MODEL, eloDiff, eloProbs, eloUpdate, emptyElo, fitDrawModel, type EloState } from "@/lib/model/elo";
 import { devigProportional, devigShin, overround } from "@/lib/model/margin";
 import { minimize, numericGradient } from "@/lib/model/optimizer";
 import { dcTau, marketsFromMatrix, poissonPmf, scoreMatrix } from "@/lib/model/poisson";
@@ -156,7 +156,7 @@ describe("Elo", () => {
 
   it("regresses toward the mean between seasons", () => {
     let s = { ratings: { A: 1700, B: 1300 }, season: "2024-25" };
-    s = eloUpdate(s, { home: "A", away: "B", homeGoals: 1, awayGoals: 1, season: "2025-26" });
+    let s: EloState = { ratings: { A: 1700, B: 1300 }, season: "2024-25" };
     expect(s.ratings.A).toBeLessThan(1700 - 40); // 1700 → 1660 after carry, then a draw
   });
 
