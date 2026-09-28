@@ -49,6 +49,15 @@ create table team_aliases (
   primary key (source, alias)
 );
 
+-- Names a provider sent that could not be resolved to a team; fix by adding an alias.
+create table unresolved_team_names (
+  source    text not null,
+  league_id text not null,
+  name      text not null,
+  last_seen timestamptz not null default now(),
+  primary key (source, league_id, name)
+);
+
 -- ---------------------------------------------------------------------------
 -- Matches & odds
 -- ---------------------------------------------------------------------------
@@ -63,6 +72,8 @@ create table matches (
                     check (status in ('scheduled', 'live', 'finished', 'postponed', 'cancelled')),
   home_goals        smallint,
   away_goals        smallint,
+  home_xg           numeric(4, 2),               -- football-data.co.uk from 2026-27 (HxG/AxG)
+  away_xg           numeric(4, 2),
   fd_org_id         int unique,
   odds_api_event_id text unique,
   updated_at        timestamptz not null default now(),
@@ -77,7 +88,7 @@ create table odds_snapshots (
   match_id    bigint not null references matches (id) on delete cascade,
   captured_at timestamptz not null,
   source      text not null check (source in ('odds_api', 'fdcouk')),
-  bookmaker   text not null,                   -- 'pinnacle' | 'winamax_fr' | ... | 'market_max' | 'market_avg'
+  bookmaker   text not null,                   -- 'pinnacle' | 'betfair_ex' | 'winamax_fr' | ... | 'market_max' | 'market_avg'
   market      text not null check (market in ('h2h', 'totals_2_5', 'btts')),
   outcome     text not null check (outcome in ('home', 'draw', 'away', 'over', 'under', 'yes', 'no')),
   price       numeric(7, 3) not null check (price > 1),
@@ -194,7 +205,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'app_owner', 'leagues', 'teams', 'team_aliases', 'matches', 'odds_snapshots',
+    'app_owner', 'leagues', 'teams', 'team_aliases', 'unresolved_team_names', 'matches', 'odds_snapshots',
     'model_ratings', 'predictions', 'analyses', 'bankroll_settings', 'bets',
     'api_usage', 'backtest_runs'
   ] loop

@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/* Lefin aesthetic — dark, minimal, gold accent. */
+@theme {
+  --color-bg: #0a0a0a;
+  --color-surface: #141414;
+  --color-line: #262626;
+  --color-fg: #f0f0f0;
+  --color-muted: #8a8a8a;
+  --color-gold: #c9a84c;
+  --color-win: #4caf7d;
+  --color-loss: #d0564b;
+
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+}

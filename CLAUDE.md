@@ -1,5 +1,7 @@
 # BetIQ — CLAUDE.md
 
+@AGENTS.md
+
 Personal, single-user app (owner: Ludo, France) to find **positive expected-value** football bets.
 Not a tipster app, not a SaaS: no Stripe, no multi-tenant, no onboarding.
 
@@ -35,7 +37,28 @@ bg `#0a0a0a`, text `#f0f0f0`, accent gold `#c9a84c`; Playfair Display (headings)
 JetBrains Mono (numbers/odds). Dark, minimal, data-dense, mobile-first.
 
 ## Commands
-_(filled in once scaffolded)_
+- `npm run dev` · `npm run build`
+- `npm run test` (Vitest, `tests/**/*.test.ts`) · `npm run typecheck` · `npm run lint`
+- `npm run verify` — all of the above + build; run before every commit
+- `npm run backfill [-- --dry-run | --league L1 | --from 2024 | --refresh]`
+- Cron jobs: `POST /api/cron/{sync-fixtures|odds-daily|odds-closing}` with `Authorization: Bearer $CRON_SECRET`
+
+## Data facts learned (don't re-discover)
+- football-data.co.uk URLs redirect to `https://football-data.co.uk/...` (no www) and need a User-Agent.
+- Times in those CSVs are UK local time → converted with `zonedTimeToUtc(..., "Europe/London")`.
+- **Pinnacle columns (`PS*`, `P>2.5`) disappear mid-2025-26 and are absent in 2026-27.** Betfair Exchange
+  (`BFE*`) exists from 2024-25. Sharp reference = Pinnacle if present, else Betfair. 2026-27 files add `HxG/AxG`.
+- Canonical team names = football-data.co.uk names. Other providers map via `team_aliases`
+  (`src/lib/teams/resolve.ts` static map + fuzzy); misses land in `unresolved_team_names` — never guessed.
+- The Odds API: we pass an explicit `bookmakers=` list (≤10 books = 1 region) → h2h+totals = 2 credits/league call.
+- Odds stored in `odds_snapshots` with bookmaker keys `pinnacle`, `betfair_ex`, `market_max`, `market_avg`, `*_fr`.
+
+## Layout
+- `src/lib/providers/` — fdcouk (CSV), fd-org, odds-api: fetch + pure mapping
+- `src/lib/ingest/` — `repo.ts` (DB access, TeamResolver), `jobs.ts` (cron jobs)
+- `src/lib/model/` — (STEP 3) pure probability engine
+- `scripts/` — backfill (and backtest in STEP 4)
+- `supabase/migrations/` — schema + pg_cron
 
 ## Workflow
 - Work phase by phase (see `docs/PLAN.md`). Run verification (typecheck, lint, tests, build) before each commit.
@@ -43,8 +66,8 @@ _(filled in once scaffolded)_
 
 ## Status
 - [x] STEP 0 — research (see `docs/PLAN.md` §0)
-- [ ] STEP 1 — plan (awaiting validation)
-- [ ] STEP 2 — data ingestion
+- [x] STEP 1 — plan (validated)
+- [x] STEP 2 — data ingestion (code + tests done; DB not yet provisioned — needs Supabase keys)
 - [ ] STEP 3 — probability engine
 - [ ] STEP 4 — backtest
 - [ ] STEP 5 — dashboard UI

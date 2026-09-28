@@ -11,6 +11,10 @@
 | Model maths | **Hand-rolled TS** (Dixon-Coles MLE + L-BFGS, Elo, Shin) | No maintained npm lib; ~40 params/league → ms-fast. Oracle: frozen `penaltyblog` (Python) outputs as Vitest fixtures |
 | Upgrade path (not MVP) | The Odds API 20K ($30/mo); API-Football ($19/mo) for injuries/lineups | Only if the backtest justifies it |
 
+**Found during STEP 2:** football-data.co.uk lost Pinnacle mid-2025-26 (none in 2026-27); Betfair Exchange
+closing (`BFEC*`) is available from 2024-25. Backtest/CLV reference = Pinnacle when present, else Betfair.
+The Odds API is called with an explicit `bookmakers=` list (7 books ≤ 10 → billed as one region).
+
 BTTS: model-only (no BTTS odds on the free budget) → shown as a probability, no value/stake.
 
 ## 1. Folder structure
